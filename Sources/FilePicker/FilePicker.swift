@@ -34,18 +34,30 @@ public struct FilePicker<LabelView: View>: View {
     
     public let types: [UTType]
     public let allowMultiple: Bool
+    public let allowFolders: Bool
     public let pickedCompletionHandler: PickedURLsCompletionHandler
     public let labelViewContent: LabelViewContent
     
-    public init(types: [UTType], allowMultiple: Bool, onPicked completionHandler: @escaping PickedURLsCompletionHandler, @ViewBuilder label labelViewContent: @escaping LabelViewContent) {
+    public init(types: [UTType],
+                allowMultiple: Bool,
+                folders: Bool,
+                onPicked completionHandler: @escaping PickedURLsCompletionHandler,
+                @ViewBuilder label labelViewContent: @escaping LabelViewContent) {
         self.types = types
         self.allowMultiple = allowMultiple
+        self.allowFolders = folders
         self.pickedCompletionHandler = completionHandler
         self.labelViewContent = labelViewContent
     }
 
-    public init(types: [UTType], allowMultiple: Bool, title: String, onPicked completionHandler: @escaping PickedURLsCompletionHandler) where LabelView == Text {
-        self.init(types: types, allowMultiple: allowMultiple, onPicked: completionHandler) { Text(title) }
+    public init(types: [UTType],
+                allowMultiple: Bool,
+                folders: Bool,
+                title: String, onPicked completionHandler: @escaping PickedURLsCompletionHandler) where LabelView == Text {
+        self.init(types: types,
+                  allowMultiple: allowMultiple,
+                  folders:folders,
+                  onPicked: completionHandler) { Text(title) }
     }
     
     #if os(iOS)
@@ -61,7 +73,9 @@ public struct FilePicker<LabelView: View>: View {
         )
         .disabled(isPresented)
         .sheet(isPresented: $isPresented) {
-            FilePickerUIRepresentable(types: types, allowMultiple: allowMultiple, onPicked: pickedCompletionHandler)
+            FilePickerUIRepresentable(types: types,
+                                      allowMultiple: allowMultiple,
+                                      onPicked: pickedCompletionHandler)
         }
     }
     
@@ -83,7 +97,7 @@ public struct FilePicker<LabelView: View>: View {
             if presented == true {
                 let panel = NSOpenPanel()
                 panel.allowsMultipleSelection = allowMultiple
-                panel.canChooseDirectories = false
+                panel.canChooseDirectories = allowFolders
                 panel.canChooseFiles = true
                 panel.allowedFileTypes = types.map { $0.identifier }
                 panel.begin { reponse in
@@ -98,4 +112,5 @@ public struct FilePicker<LabelView: View>: View {
     }
     #endif
     
+    // if wasm?
 }
